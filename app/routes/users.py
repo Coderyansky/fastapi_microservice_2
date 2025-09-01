@@ -9,7 +9,7 @@ from app.schemas.user import (
     UserCreate, UserResponse, UserProfileUpdate, 
     PasswordChange, AdminPasswordChange, StandardResponse
 )
-from app.auth.basic_auth import get_current_user, check_user_access
+from app.auth.basic_auth import get_current_user, check_user_access, check_admin_access
 from app.auth.password import PasswordService
 
 router = APIRouter()
@@ -92,8 +92,9 @@ def delete_user(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Delete user by ID (only own profile)"""
-    if not check_user_access(current_user, user_id):
+    """Delete user by ID (only own profile or admin)"""
+    # Check if user can access this resource (own profile or admin)
+    if not check_user_access(current_user, user_id) and not check_admin_access(current_user):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Недостаточно прав для выполнения операции"
@@ -183,6 +184,13 @@ def admin_change_password(
     db: Session = Depends(get_db)
 ):
     """Change user password by ID (administrative function)"""
+    # Check admin privileges
+    if not check_admin_access(current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Недостаточно прав для выполнения административных операций"
+        )
+    
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(

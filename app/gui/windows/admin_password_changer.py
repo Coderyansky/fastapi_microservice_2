@@ -251,7 +251,8 @@ class AdminPasswordChanger:
             user_id: ID of the user whose password to change
             new_password: New password to set
         """
-        try:\n            # Change password through session manager
+        try:
+            # Change password through session manager
             success, error = self.session_manager.admin_change_user_password(user_id, new_password)
             
             # Schedule UI update on main thread
@@ -353,15 +354,3 @@ class AdminPasswordChanger:
         # Clear password fields for security
         clear_entry_fields(self.new_password_entry, self.repeat_password_entry)
         self.window.withdraw()
-    
-    def is_visible(self) -> bool:
-        """
-        Check if the admin password changer window is visible.
-        
-        Returns:
-            True if window is visible, False otherwise
-        """
-        try:
-            return self.window.winfo_viewable()
-        except tk.TclError:
-            return False

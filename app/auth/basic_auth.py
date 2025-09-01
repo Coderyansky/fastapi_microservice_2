@@ -36,3 +36,13 @@ def get_current_user(
 def check_user_access(current_user: User, target_user_id: int) -> bool:
     """Check if current user can access target user's data"""
     return current_user.id == target_user_id
+
+
+def is_admin(current_user: User) -> bool:
+    """Check if current user is admin"""
+    return current_user.email == "admin@example.com"
+
+
+def check_admin_access(current_user: User) -> bool:
+    """Check if current user has admin privileges"""
+    return is_admin(current_user)
